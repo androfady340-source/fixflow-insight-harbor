@@ -14,7 +14,155 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      analysis_runs: {
+        Row: {
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          full_name: string | null
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          full_name?: string | null
+          id: string
+        }
+        Update: {
+          created_at?: string
+          full_name?: string | null
+          id?: string
+        }
+        Relationships: []
+      }
+      projects: {
+        Row: {
+          analysis_json: Json | null
+          business_description: string
+          business_type: string
+          created_at: string
+          current_tools: string[]
+          current_workflow: Json | null
+          daily_volume: string
+          desired_outcome: string
+          id: string
+          is_sample: boolean
+          name: string
+          problem_description: string
+          problem_type: string
+          recommended_workflow: Json | null
+          status: string
+          team_size: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          analysis_json?: Json | null
+          business_description?: string
+          business_type?: string
+          created_at?: string
+          current_tools?: string[]
+          current_workflow?: Json | null
+          daily_volume?: string
+          desired_outcome?: string
+          id?: string
+          is_sample?: boolean
+          name: string
+          problem_description?: string
+          problem_type?: string
+          recommended_workflow?: Json | null
+          status?: string
+          team_size?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          analysis_json?: Json | null
+          business_description?: string
+          business_type?: string
+          created_at?: string
+          current_tools?: string[]
+          current_workflow?: Json | null
+          daily_volume?: string
+          desired_outcome?: string
+          id?: string
+          is_sample?: boolean
+          name?: string
+          problem_description?: string
+          problem_type?: string
+          recommended_workflow?: Json | null
+          status?: string
+          team_size?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      tasks: {
+        Row: {
+          created_at: string
+          description: string
+          due_date: string | null
+          id: string
+          owner: string | null
+          priority: string
+          project_id: string
+          status: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          due_date?: string | null
+          id?: string
+          owner?: string | null
+          priority?: string
+          project_id: string
+          status?: string
+          title: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          due_date?: string | null
+          id?: string
+          owner?: string | null
+          priority?: string
+          project_id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
