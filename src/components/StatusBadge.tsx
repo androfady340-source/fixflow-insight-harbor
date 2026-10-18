@@ -8,7 +8,7 @@ const tone: Record<string, string> = {
 };
 
 export function StatusBadge({ status }: { status: string }) {
-  return <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${tone[status] ?? tone.draft}`}>{STATUS_LABEL[status] ?? status}</span>;
+  return <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${tone[status] ?? tone["draft"]}`}>{STATUS_LABEL[status] ?? status}</span>;
 }
 
 const lv: Record<string, string> = {
@@ -17,5 +17,5 @@ const lv: Record<string, string> = {
   low: "bg-muted text-muted-foreground",
 };
 export function LevelBadge({ level, prefix }: { level: string; prefix?: string }) {
-  return <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${lv[level] ?? lv.low}`}>{prefix ? `${prefix}: ` : ""}{level}</span>;
+  return <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${lv[level] ?? lv["low"]}`}>{prefix ? `${prefix}: ` : ""}{level}</span>;
 }

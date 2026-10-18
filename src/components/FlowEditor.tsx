@@ -32,7 +32,7 @@ function FFNode({ data, selected }: NodeProps<Node<FlowNodeData>>) {
 }
 const nodeTypes = { ff: FFNode };
 
-export default function FlowEditor({ graph, onSave, readOnly }: { graph: Graph; onSave?: (g: Graph) => Promise<void>; readOnly?: boolean }) {
+export default function FlowEditor({ graph, onSave, readOnly }: { graph: Graph; onSave?: ((g: Graph) => Promise<void>) | undefined; readOnly?: boolean }) {
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<FlowNodeData>>(graph.nodes as Node<FlowNodeData>[]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>(graph.edges as Edge[]);
   const [selected, setSelected] = useState<string | null>(null);
