@@ -288,7 +288,7 @@ function AuthPage() {
   );
 }
 
-function Field({ id, label, error, extra, children }: { id: string; label: string; error?: string; extra?: React.ReactNode; children: React.ReactNode }) {
+function Field({ id, label, error, extra, children }: { id: string; label: string; error?: string | undefined; extra?: React.ReactNode; children: React.ReactNode }) {
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between">
