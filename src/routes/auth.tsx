@@ -97,12 +97,12 @@ function AuthPage() {
     setFormError("");
     const errs: Partial<Record<"name"|"email"|"password"|"confirm", string>> = {};
     const em = emailSchema.safeParse(email);
-    if (!em.success) errs["email"] = em.error.issues[0].message;
+    if (!em.success) errs["email"] = em.error.issues[0]?.message ?? "Invalid";
 
     if (mode === "signup") {
       if (name.trim().length < 2) errs["name"] = "Enter your name";
       const pw = strongPassword.safeParse(password);
-      if (!pw.success) errs["password"] = pw.error.issues[0].message;
+      if (!pw.success) errs["password"] = pw.error.issues[0]?.message ?? "Invalid";
       if (confirm !== password) errs["confirm"] = "Passwords don't match";
     } else if (mode === "login" && !password) errs["password"] = "Enter your password";
     setErrors(errs);
