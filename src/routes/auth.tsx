@@ -65,7 +65,11 @@ function AuthPage() {
     setNow(Date.now());
     const t = setInterval(() => setNow(Date.now()), 1000);
     supabase.auth.getUser().then(({ data }) => {
-      if (data.user) navigate({ to: dest as "/projects", replace: true });
+      if (data.user) {
+        const saved = safeRedirect(sessionStorage.getItem("ff_after_login") ?? dest);
+        sessionStorage.removeItem("ff_after_login");
+        navigate({ to: saved as "/projects", replace: true });
+      }
     });
     return () => clearInterval(t);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
