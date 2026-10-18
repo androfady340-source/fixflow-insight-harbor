@@ -93,7 +93,7 @@ export default function FlowEditor({ graph, onSave, readOnly }: { graph: Graph; 
             nodeTypes={nodeTypes}
             onNodesChange={(c) => { onNodesChange(c); if (c.some((x) => x.type === "position" && x.dragging === false)) setDirty(true); }}
             onEdgesChange={(c) => { onEdgesChange(c); if (c.some((x) => x.type === "remove")) setDirty(true); }}
-            onConnect={readOnly ? undefined : onConnect}
+            onConnect={readOnly ? () => {} : onConnect}
             onNodeClick={(_, n) => setSelected(n.id)}
             onPaneClick={() => setSelected(null)}
             nodesDraggable={!readOnly}
