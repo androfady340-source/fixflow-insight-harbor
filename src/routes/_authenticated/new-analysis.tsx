@@ -41,7 +41,7 @@ function Wizard() {
   const run = useServerFn(generateAnalysis);
   const [step, setStep] = useState(0);
   const [busy, setBusy] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [errors, setErrors] = useState<Partial<Record<keyof Form, string>>>({});
   const [f, setF] = useState<Form>(() => ({
     name: existing?.name ?? "",
     business_type: existing?.business_type ?? "",
@@ -56,7 +56,7 @@ function Wizard() {
   const set = <K extends keyof Form>(k: K, v: Form[K]) => setF((p) => ({ ...p, [k]: v }));
 
   function validate(s: number) {
-    const e: Record<string, string> = {};
+    const e: Partial<Record<keyof Form, string>> = {};
     if (s === 0) {
       if (!f.name.trim()) e.name = "Required";
       if (!f.business_type) e.business_type = "Pick one";
@@ -190,7 +190,7 @@ function Wizard() {
   );
 }
 
-function F({ label, error, id, children }: { label: string; error?: string; id?: string; children: React.ReactNode }) {
+function F({ label, error, id, children }: { label: string; error?: string | undefined; id?: string; children: React.ReactNode }) {
   return (
     <div className="space-y-2">
       <Label htmlFor={id}>{label}</Label>

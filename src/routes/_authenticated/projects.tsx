@@ -42,7 +42,7 @@ function Projects() {
     const name = window.prompt("New project name", current)?.trim();
     if (!name || name === current) return;
     const { error } = await supabase.from("projects").update({ name: name.slice(0, 120) }).eq("id", id);
-    if (error) return toast.error("Rename failed");
+    if (error) { toast.error("Rename failed"); return; }
     qc.invalidateQueries({ queryKey: ["projects"] });
   }
 
@@ -50,7 +50,7 @@ function Projects() {
     if (!toDelete) return;
     const { error } = await supabase.from("projects").delete().eq("id", toDelete);
     setToDelete(null);
-    if (error) return toast.error("Delete failed");
+    if (error) { toast.error("Delete failed"); return; }
     toast.success("Project deleted");
     qc.invalidateQueries({ queryKey: ["projects"] });
   }
@@ -70,7 +70,7 @@ function Projects() {
       })
       .select("id")
       .single();
-    if (error || !p) return toast.error("Couldn't add sample");
+    if (error || !p) { toast.error("Couldn't add sample"); return; }
     await supabase.from("tasks").insert(
       SAMPLE_ANALYSIS.tasks.map((t) => ({ project_id: p.id, user_id: user.user!.id, title: t.title, description: t.description, priority: t.priority })),
     );

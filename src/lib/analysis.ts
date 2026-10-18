@@ -82,7 +82,7 @@ export interface FlowNodeData {
 }
 export interface Graph {
   nodes: { id: string; type: "ff"; position: { x: number; y: number }; data: FlowNodeData }[];
-  edges: { id: string; source: string; target: string; label?: string }[];
+  edges: { id: string; source: string; target: string; label?: string | undefined }[];
 }
 
 /** Convert AI steps into a positioned graph (simple layered layout). */
