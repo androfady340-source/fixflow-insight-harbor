@@ -1,3 +1,4 @@
+import type { TablesUpdate } from "@/integrations/supabase/types";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -43,7 +44,7 @@ function ProjectPage() {
     setBusy(true);
     const r = await run({ data: { projectId: id } }).catch(() => ({ ok: false as const, error: "Request failed." }));
     setBusy(false);
-    if (!r.ok) return toast.error(r.error);
+    if (!r.ok) { toast.error(r.error); return; }
     toast.success("Analysis ready");
     qc.invalidateQueries({ queryKey: ["project", id] });
     qc.invalidateQueries({ queryKey: ["tasks", id] });
@@ -122,11 +123,11 @@ function Tasks({ projectId }: { projectId: string }) {
     if (!t) return;
     const { data: u } = await supabase.auth.getUser();
     const { error } = await supabase.from("tasks").insert({ project_id: projectId, user_id: u.user!.id, title: t.slice(0, 200) });
-    if (error) return toast.error("Couldn't add task");
+    if (error) { toast.error("Couldn't add task"); return; }
     setTitle("");
     refresh();
   }
-  async function patch(id: string, v: Record<string, unknown>) {
+  async function patch(id: string, v: TablesUpdate<"tasks">) {
     const { error } = await supabase.from("tasks").update(v).eq("id", id);
     if (error) toast.error("Update failed");
     refresh();

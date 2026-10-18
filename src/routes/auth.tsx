@@ -50,7 +50,7 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [show, setShow] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [errors, setErrors] = useState<Partial<Record<"name"|"email"|"password"|"confirm", string>>>({});
   const [formError, setFormError] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState<"" | "signup" | "forgot">("");
@@ -95,16 +95,16 @@ function AuthPage() {
     e.preventDefault();
     if (loading) return;
     setFormError("");
-    const errs: Record<string, string> = {};
+    const errs: Partial<Record<"name"|"email"|"password"|"confirm", string>> = {};
     const em = emailSchema.safeParse(email);
-    if (!em.success) errs.email = em.error.issues[0].message;
+    if (!em.success) errs["email"] = em.error.issues[0].message;
 
     if (mode === "signup") {
-      if (name.trim().length < 2) errs.name = "Enter your name";
+      if (name.trim().length < 2) errs["name"] = "Enter your name";
       const pw = strongPassword.safeParse(password);
-      if (!pw.success) errs.password = pw.error.issues[0].message;
-      if (confirm !== password) errs.confirm = "Passwords don't match";
-    } else if (mode === "login" && !password) errs.password = "Enter your password";
+      if (!pw.success) errs["password"] = pw.error.issues[0].message;
+      if (confirm !== password) errs["confirm"] = "Passwords don't match";
+    } else if (mode === "login" && !password) errs["password"] = "Enter your password";
     setErrors(errs);
     if (Object.keys(errs).length || !em.success) return;
 
