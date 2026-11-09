@@ -1,30 +1,104 @@
-# Fixflow Insight Harbor
+# FixFlow
 
-تعديل:
+FixFlow is a workflow-improvement tool for small businesses. It turns a description of an operational problem into a structured analysis, proposed workflow, practical recommendations, and an actionable task list.
 
-صفحه تسجيل الدخول خليها مومنه أكثر 
+**Live app:** https://fixflow-insight-harbor.lovable.app
 
-قبل الكلام المكتوب وخليه أوضح يعني النتيجه حد المختصر المفيد وحطه وكذلك برده في الصفح الرئيسيه وخد بالك انا هيبقي عايز المشروع في الاخر ملف مضغوط عشان اعمله لينك من كلاود فلير بس مش عايز يظهر اسم الحساب فيه زي كدهhttps://noir-auto-haus.fadysgb2016.workers.dev
+## Core capabilities
 
-This project was built with [Lovable](https://lovable.dev).
+- Secure account access with email/password and Google sign-in.
+- Guided four-step intake for business context, workflow problems, operating volume, team size, and current tools.
+- AI-assisted workflow analysis with structured output and validation.
+- Current and recommended workflow diagrams.
+- Project status tracking and editable workflows.
+- Task lists with priorities, owners, due dates, and completion states.
+- Printable analysis report.
+- Per-account project and task isolation enforced by Supabase Row Level Security.
 
-**Live app**: https://fixflow-insight-harbor.lovable.app
+## Technology
 
-## Build with Lovable
+- React 19 and TypeScript
+- TanStack Start and TanStack Router
+- Supabase Auth and PostgreSQL with Row Level Security
+- Lovable AI Gateway
+- React Flow (@xyflow/react)
+- Tailwind CSS and Radix UI
+- Vitest, ESLint, and Prettier
+- Nitro with Cloudflare-oriented build configuration
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/38955a64-e1c9-4a64-a0eb-61701eac5be7).
+## Local development
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+### Requirements
 
-## Development
+- Bun (the repository includes `bun.lock`)
+- A Supabase project with the database migration applied
+- Lovable AI Gateway credentials/configuration for live AI analysis
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+### Install
 
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
+```bash
+git clone https://github.com/androfady340-source/fixflow-insight-harbor.git
+cd fixflow-insight-harbor
+bun install --frozen-lockfile
 ```
+
+### Environment
+
+Copy `.env.example` to `.env` and fill in the values from your Supabase project.
+
+| Variable | Purpose |
+| --- | --- |
+| `VITE_SUPABASE_URL` | Supabase URL used by the browser |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Public/publishable Supabase key used by the browser |
+| `SUPABASE_URL` | Supabase URL used by server-side requests |
+| `SUPABASE_PUBLISHABLE_KEY` | Publishable key used by server-side authenticated requests |
+
+The server-only helper in `src/integrations/supabase/client.server.ts` can use `SUPABASE_SERVICE_ROLE_KEY` for trusted administrative operations. It is not required by the current analysis flow. If you enable a server operation that needs it, configure it only as a server secret. Never use it in browser code or expose it through a `VITE_` variable.
+
+### Database
+
+Apply the SQL files in `drizzle/migrations/` to the Supabase project in numerical order. The initial migration creates profiles, projects, tasks, and analysis-run records with Row Level Security policies.
+
+### Run
+
+```bash
+bun run dev
+```
+
+Vite prints the local development URL in the terminal.
+
+## Scripts
+
+| Command | Description |
+| --- | --- |
+| `bun run dev` | Start the development server |
+| `bun run lint` | Run ESLint |
+| `bun run test` | Run the Vitest test suite |
+| `bun run build` | Create a production build |
+| `bun run preview` | Preview the production build |
+| `bun run format` | Format source files with Prettier |
+
+## Security notes
+
+- Keep local environment files out of Git. Only `.env.example` belongs in version control.
+- Browser builds may contain the Supabase publishable key; database access must remain protected by RLS.
+- Keep service-role credentials server-side only.
+- Analysis generation requires an authenticated user and verifies project access through Supabase.
+- Apply all database migrations before deploying the matching application version.
+
+## Project structure
+
+```text
+src/
+  components/             UI and workflow editor components
+  integrations/supabase/  Supabase clients and auth middleware
+  lib/                    Queries, analysis logic, and validation
+  routes/                 TanStack file-based routes
+  test/                   Automated tests
+drizzle/migrations/       SQL schema and security migrations
+public/                   Static assets
+```
+
+## Maintainer
+
+Andro Fady — [GitHub](https://github.com/androfady340-source)
