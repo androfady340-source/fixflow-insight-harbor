@@ -56,12 +56,16 @@ function Projects() {
   }
 
   async function addSample() {
-    const { data: user } = await supabase.auth.getUser();
+    const { data: auth, error: authError } = await supabase.auth.getUser();
+    if (authError || !auth.user) {
+      toast.error("Your session expired. Please log in again.");
+      return;
+    }
     const { data: p, error } = await supabase
       .from("projects")
       .insert({
         ...SAMPLE_PROJECT,
-        user_id: user.user!.id,
+        user_id: auth.user.id,
         is_sample: true,
         status: "analyzed",
         analysis_json: SAMPLE_ANALYSIS as never,
@@ -71,9 +75,14 @@ function Projects() {
       .select("id")
       .single();
     if (error || !p) { toast.error("Couldn't add sample"); return; }
-    await supabase.from("tasks").insert(
-      SAMPLE_ANALYSIS.tasks.map((t) => ({ project_id: p.id, user_id: user.user!.id, title: t.title, description: t.description, priority: t.priority })),
+    const { error: taskError } = await supabase.from("tasks").insert(
+      SAMPLE_ANALYSIS.tasks.map((t) => ({ project_id: p.id, user_id: auth.user.id, title: t.title, description: t.description, priority: t.priority })),
     );
+    if (taskError) {
+      const { error: cleanupError } = await supabase.from("projects").delete().eq("id", p.id);
+      toast.error(cleanupError ? "Sample project was created, but its tasks failed. Please delete it and try again." : "Couldn't create sample tasks. Please try again.");
+      return;
+    }
     qc.invalidateQueries({ queryKey: ["projects"] });
     navigate({ to: "/projects/$id", params: { id: p.id } });
   }
