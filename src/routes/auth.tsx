@@ -143,9 +143,16 @@ function AuthPage() {
         }
         setSent("signup");
       } else {
-        await supabase.auth.resetPasswordForEmail(em.data, { redirectTo: `${window.location.origin}/reset-password` });
+        const { error } = await supabase.auth.resetPasswordForEmail(em.data, { redirectTo: `${window.location.origin}/reset-password` });
+        if (error) {
+          setFormError("Couldn't send the reset email. Please try again.");
+          return;
+        }
         setSent("forgot");
       }
+    } catch (error) {
+      console.error("Authentication request failed", error);
+      setFormError("A connection error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -153,10 +160,15 @@ function AuthPage() {
 
   async function google() {
     setFormError("");
-    sessionStorage.setItem("ff_after_login", dest);
-    const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/auth" });
-    if (r.error) setFormError("Google sign-in failed. Try again.");
-    else if (!r.redirected) navigate({ to: dest as "/projects", replace: true });
+    try {
+      sessionStorage.setItem("ff_after_login", dest);
+      const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin + "/auth" });
+      if (r.error) setFormError("Google sign-in failed. Try again.");
+      else if (!r.redirected) navigate({ to: dest as "/projects", replace: true });
+    } catch (error) {
+      console.error("Google sign-in failed", error);
+      setFormError("Google sign-in failed. Check your connection and try again.");
+    }
   }
 
   const title = mode === "signup" ? "Create your account" : mode === "forgot" ? "Reset password" : "Welcome back";

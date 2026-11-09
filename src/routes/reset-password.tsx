@@ -32,10 +32,19 @@ function Reset() {
     const r = strongPassword.safeParse(pw);
     if (!r.success) return setErr("Use 10+ characters with upper, lower, number and symbol.");
     setLoading(true);
-    const { error } = await supabase.auth.updateUser({ password: pw });
-    setLoading(false);
-    if (error) return setErr("Link expired or password rejected. Request a new link.");
-    navigate({ to: "/projects", replace: true });
+    try {
+      const { error } = await supabase.auth.updateUser({ password: pw });
+      if (error) {
+        setErr("Link expired or password rejected. Request a new link.");
+        return;
+      }
+      navigate({ to: "/projects", replace: true });
+    } catch (error) {
+      console.error("Password update failed", error);
+      setErr("A connection error occurred. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
