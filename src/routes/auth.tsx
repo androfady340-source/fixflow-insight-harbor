@@ -61,7 +61,9 @@ function AuthPage() {
     try {
       const raw = localStorage.getItem(LOCK_KEY);
       if (raw) setLock(JSON.parse(raw));
-    } catch {}
+    } catch (error) {
+      console.warn("Unable to restore local sign-in lockout state.", error);
+    }
     setNow(Date.now());
     const t = setInterval(() => setNow(Date.now()), 1000);
     supabase.auth.getUser().then(({ data }) => {
