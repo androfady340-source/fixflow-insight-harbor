@@ -30,22 +30,16 @@ export const generateAnalysis = createServerFn({ method: "POST" })
       .maybeSingle();
     if (error || !project) return { ok: false as const, error: "Project not found." };
 
-    const since = new Date(Date.now() - 3600_000).toISOString();
-    const { count, error: countError } = await supabase
-      .from("analysis_runs")
-      .select("id", { count: "exact", head: true })
-      .gte("created_at", since);
-    if (countError) {
-      console.error("analysis rate-limit lookup failed", countError);
+    const { data: runAllowed, error: runError } = await supabase.rpc("try_consume_analysis_run", {
+      p_max_runs: MAX_RUNS_PER_HOUR,
+      p_window_seconds: 3600,
+    });
+    if (runError) {
+      console.error("analysis usage reservation failed", runError);
       return { ok: false as const, error: "Couldn't verify the usage limit. Please try again." };
     }
-    if ((count ?? 0) >= MAX_RUNS_PER_HOUR)
+    if (!runAllowed) {
       return { ok: false as const, error: "Hourly limit reached. Please try again later." };
-
-    const { error: runError } = await supabase.from("analysis_runs").insert({ user_id: userId });
-    if (runError) {
-      console.error("analysis usage record failed", runError);
-      return { ok: false as const, error: "Couldn't start the analysis. Please try again." };
     }
 
     const userInput = JSON.stringify({
