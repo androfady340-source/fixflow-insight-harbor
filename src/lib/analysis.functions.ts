@@ -31,13 +31,22 @@ export const generateAnalysis = createServerFn({ method: "POST" })
     if (error || !project) return { ok: false as const, error: "Project not found." };
 
     const since = new Date(Date.now() - 3600_000).toISOString();
-    const { count } = await supabase
+    const { count, error: countError } = await supabase
       .from("analysis_runs")
       .select("id", { count: "exact", head: true })
       .gte("created_at", since);
+    if (countError) {
+      console.error("analysis rate-limit lookup failed", countError);
+      return { ok: false as const, error: "Couldn't verify the usage limit. Please try again." };
+    }
     if ((count ?? 0) >= MAX_RUNS_PER_HOUR)
       return { ok: false as const, error: "Hourly limit reached. Please try again later." };
-    await supabase.from("analysis_runs").insert({ user_id: userId });
+
+    const { error: runError } = await supabase.from("analysis_runs").insert({ user_id: userId });
+    if (runError) {
+      console.error("analysis usage record failed", runError);
+      return { ok: false as const, error: "Couldn't start the analysis. Please try again." };
+    }
 
     const userInput = JSON.stringify({
       business_type: project.business_type,
@@ -81,7 +90,7 @@ export const generateAnalysis = createServerFn({ method: "POST" })
     }
     if (!analysis) return { ok: false as const, error: "The AI returned an unreadable result. Please try again." };
 
-    await supabase
+    const { error: projectUpdateError } = await supabase
       .from("projects")
       .update({
         analysis_json: analysis as never,
@@ -90,10 +99,23 @@ export const generateAnalysis = createServerFn({ method: "POST" })
         status: "analyzed",
       })
       .eq("id", project.id);
+    if (projectUpdateError) {
+      console.error("analysis project save failed", projectUpdateError);
+      return { ok: false as const, error: "The analysis was generated but couldn't be saved. Please try again." };
+    }
 
-    await supabase.from("tasks").delete().eq("project_id", project.id).neq("status", "done");
-    if (analysis.tasks.length)
-      await supabase.from("tasks").insert(
+    const { error: taskDeleteError } = await supabase
+      .from("tasks")
+      .delete()
+      .eq("project_id", project.id)
+      .neq("status", "done");
+    if (taskDeleteError) {
+      console.error("old analysis task cleanup failed", taskDeleteError);
+      return { ok: false as const, error: "The analysis was saved, but the task list couldn't be refreshed." };
+    }
+
+    if (analysis.tasks.length) {
+      const { error: taskInsertError } = await supabase.from("tasks").insert(
         analysis.tasks.map((t) => ({
           project_id: project.id,
           user_id: userId,
@@ -103,6 +125,11 @@ export const generateAnalysis = createServerFn({ method: "POST" })
           status: "todo",
         })),
       );
+      if (taskInsertError) {
+        console.error("analysis task creation failed", taskInsertError);
+        return { ok: false as const, error: "The analysis was saved, but its suggested tasks couldn't be created." };
+      }
+    }
 
     return { ok: true as const };
   });
