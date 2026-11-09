@@ -58,7 +58,11 @@ function ProjectPage() {
   }
 
   async function setStatus(status: string) {
-    await supabase.from("projects").update({ status }).eq("id", id);
+    const { error } = await supabase.from("projects").update({ status }).eq("id", id);
+    if (error) {
+      toast.error("Couldn't update project status");
+      return;
+    }
     qc.invalidateQueries({ queryKey: ["project", id] });
     qc.invalidateQueries({ queryKey: ["projects"] });
   }
@@ -121,19 +125,30 @@ function Tasks({ projectId }: { projectId: string }) {
   async function add() {
     const t = title.trim();
     if (!t) return;
-    const { data: u } = await supabase.auth.getUser();
-    const { error } = await supabase.from("tasks").insert({ project_id: projectId, user_id: u.user!.id, title: t.slice(0, 200) });
+    const { data: auth, error: authError } = await supabase.auth.getUser();
+    if (authError || !auth.user) {
+      toast.error("Your session expired. Please log in again.");
+      return;
+    }
+    const { error } = await supabase.from("tasks").insert({ project_id: projectId, user_id: auth.user.id, title: t.slice(0, 200) });
     if (error) { toast.error("Couldn't add task"); return; }
     setTitle("");
     refresh();
   }
   async function patch(id: string, v: TablesUpdate<"tasks">) {
     const { error } = await supabase.from("tasks").update(v).eq("id", id);
-    if (error) toast.error("Update failed");
+    if (error) {
+      toast.error("Task update failed");
+      return;
+    }
     refresh();
   }
   async function del(id: string) {
-    await supabase.from("tasks").delete().eq("id", id);
+    const { error } = await supabase.from("tasks").delete().eq("id", id);
+    if (error) {
+      toast.error("Task deletion failed");
+      return;
+    }
     refresh();
   }
 
